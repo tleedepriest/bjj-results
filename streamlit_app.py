@@ -113,7 +113,17 @@ def load_data(**kwargs):
         with blob.open('r') as fh:
             for line in fh:
                 row = json.loads(line)
-                rows.append(row)
+                if isinstance(row, dict):
+                    rows.append(row)
+                elif isinstance(row, list):
+                    for dictionary in row:
+                        if isinstance(dictionary, dict):
+                            rows.append(dictionary)
+                        else:
+                            raise AttributeError(f"{dictionary} is not type dict, it is {type(dictionary)}")
+                else:
+                    raise AttributeError(f"{row} is {type(row)}")
+
     data = pd.DataFrame.from_records(rows, **kwargs)
     data[YEAR_COL] = data[DATETIME_COL].str.extract(r'(\d{4})')
     lowercase = lambda x: str(x).lower()
